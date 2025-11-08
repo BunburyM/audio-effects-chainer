@@ -53,10 +53,10 @@ AudioControlSGTL5000     sgtl5000_1;     //xy=244.3333282470703,597.333328247070
 #define reverb_mix_pot A14-2
 
 // Debounce buttons
-Bounce filter_button = Bounce(0, 15);
+Bounce filter_button = Bounce(0, 10);
 
 // Variables
-float cutoff_freq_val = 15000; // 0 to 15000 Hz
+float cutoff_freq_val = 20000; // 0 to 20000 Hz
 float waveshape_mix_val = 0; // 0 to 1
 float delay_ms_val = 100; // 0 to 1000 ms
 float delay_mix_val = 0; // 0 to 1
@@ -65,6 +65,8 @@ float reverb_damping_val = 0; // 0 to 1
 float reverb_mix_val = 0; // 0 to 1
 float main_signal_val = 0; // 0 to 1
 float master_volume_val = 0; // 0 to 1
+int filter_button_state = 0; // 0 to 1
+int filter_choose_val = 0; // 0 to 2
 
 void setup() 
 {
@@ -103,9 +105,15 @@ void loop()
 {
    
   /*  FREQUENCY SECTION   */
-  cutoff_freq_val = analog_map(cutoff_pot, 0, 15000);
+  cutoff_freq_val = analog_map(cutoff_pot, 0, 20000);
   filter1.frequency(cutoff_freq_val);
-
+  filter_button_state = digitalRead(filter_button);
+  // See if user wants to switch filter
+  if(filter_button_state == LOW)
+  {
+    switch_filter();
+  }
+  
   /*  WAVESHAPE SECTION   */
   waveshape_mix_val = analog_map(waveshape_mix_pot, 0, 1);
   main_signal_val = 1 - waveshape_mix_val;
@@ -151,4 +159,35 @@ float analog_map(int pot, float range_low, float range_high)
   float value = analogRead(pot);
   float result =  (value - 0.0)/(1023.0 - 0.0)*(range_high-range_low)+range_low;
   return result;
+}
+
+// Switch between a low-pass, high-pass, and band-pass filter
+void switch_filter()
+{
+  // Update value to choose from low-pass, high-pass, or band-pass
+  filter_choose_val = (filter_choose_val + 1) % 3; 
+  
+  switch(filter_choose_val)
+  {
+    // Low Pass Filter
+    case 0:
+      filter_mix.gain(0, 1); // Low pass Output
+      filter_mix.gain(1, 0); // Band Pass Output
+      filter_mix.gain(2, 0); // High Pass Output
+      break;
+
+    // High Pass Filter
+    case 1:
+      filter_mix.gain(0, 0); // Low pass Output
+      filter_mix.gain(1, 0); // Band Pass Output
+      filter_mix.gain(2, 1); // High Pass Output
+      break;
+
+    // Band Pass Filter
+    case 2:
+      filter_mix.gain(0, 0); // Low pass Output
+      filter_mix.gain(1, 1); // Band Pass Output
+      filter_mix.gain(2, 0); // High Pass Output
+      break;
+  }
 }
