@@ -14,28 +14,31 @@ AudioEffectWaveshaper    waveshape1;     //xy=455.33331298828125,487.33334350585
 AudioMixer4              waveshape_mix;         //xy=617.3333129882812,364.3333435058594
 AudioEffectDelay         delay1;         //xy=737,486.33331298828125
 AudioMixer4              delay_mix;         //xy=858.3333129882812,353.33331298828125
-AudioEffectFreeverb      reverb1;      //xy=1017.333251953125,470.3333435058594
-AudioMixer4              reverb_mix;         //xy=1169.6666259765625,366.33331298828125
+AudioEffectFreeverb      reverb1;      //xy=944.333251953125,469.3333435058594
+AudioMixer4              reverb_mix;         //xy=1066.6666259765625,362.33331298828125
+AudioMixer4              bypass_mix;         //xy=1214.3333740234375,291.3333435058594
 AudioAmplifier           amp1;           //xy=1332.3809356689453,373.3333168029785
 AudioOutputI2S           i2s_out;           //xy=1504.762092590332,366.90478134155273
 AudioConnection          patchCord1(i2s_in, 0, pan_mix, 0);
 AudioConnection          patchCord2(i2s_in, 1, pan_mix, 1);
 AudioConnection          patchCord3(pan_mix, 0, filter1, 0);
-AudioConnection          patchCord4(filter1, 0, filter_mix, 0);
-AudioConnection          patchCord5(filter1, 1, filter_mix, 1);
-AudioConnection          patchCord6(filter1, 2, filter_mix, 2);
-AudioConnection          patchCord7(filter_mix, waveshape1);
-AudioConnection          patchCord8(filter_mix, 0, waveshape_mix, 0);
-AudioConnection          patchCord9(waveshape1, 0, waveshape_mix, 1);
-AudioConnection          patchCord10(waveshape_mix, delay1);
-AudioConnection          patchCord11(waveshape_mix, 0, delay_mix, 0);
-AudioConnection          patchCord12(delay1, 0, delay_mix, 1);
-AudioConnection          patchCord13(delay_mix, reverb1);
-AudioConnection          patchCord14(delay_mix, 0, reverb_mix, 0);
-AudioConnection          patchCord15(reverb1, 0, reverb_mix, 1);
-AudioConnection          patchCord16(reverb_mix, amp1);
-AudioConnection          patchCord17(amp1, 0, i2s_out, 0);
-AudioConnection          patchCord18(amp1, 0, i2s_out, 1);
+AudioConnection          patchCord4(pan_mix, 0, bypass_mix, 0);
+AudioConnection          patchCord5(filter1, 0, filter_mix, 0);
+AudioConnection          patchCord6(filter1, 1, filter_mix, 1);
+AudioConnection          patchCord7(filter1, 2, filter_mix, 2);
+AudioConnection          patchCord8(filter_mix, waveshape1);
+AudioConnection          patchCord9(filter_mix, 0, waveshape_mix, 0);
+AudioConnection          patchCord10(waveshape1, 0, waveshape_mix, 1);
+AudioConnection          patchCord11(waveshape_mix, delay1);
+AudioConnection          patchCord12(waveshape_mix, 0, delay_mix, 0);
+AudioConnection          patchCord13(delay1, 0, delay_mix, 1);
+AudioConnection          patchCord14(delay_mix, reverb1);
+AudioConnection          patchCord15(delay_mix, 0, reverb_mix, 0);
+AudioConnection          patchCord16(reverb1, 0, reverb_mix, 1);
+AudioConnection          patchCord17(reverb_mix, 0, bypass_mix, 1);
+AudioConnection          patchCord18(bypass_mix, amp1);
+AudioConnection          patchCord19(amp1, 0, i2s_out, 0);
+AudioConnection          patchCord20(amp1, 0, i2s_out, 1);
 AudioControlSGTL5000     sgtl5000_1;     //xy=244.3333282470703,597.3333282470703
 // GUItool: end automatically generated code
 
@@ -54,6 +57,7 @@ AudioControlSGTL5000     sgtl5000_1;     //xy=244.3333282470703,597.333328247070
 
 // Debounce buttons
 Bounce filter_button = Bounce(0, 10);
+Bounce bypass_button = Bounce(1, 10);
 
 // Variables
 float cutoff_freq_val = 20000; // 0 to 20000 Hz
@@ -67,11 +71,14 @@ float main_signal_val = 0; // 0 to 1
 float master_volume_val = 0; // 0 to 1
 int filter_button_state = 0; // 0 to 1
 int filter_choose_val = 0; // 0 to 2
+int bypass_switch_state = 0; // 0 to 1
 
 void setup() 
 {
   Serial.begin(9600);
   pinMode(0, INPUT_PULLUP); // Filter choice button
+  pinMode(1, INPUT_PULLUP); // Bypass Mode
+
   AudioMemory(1500);
   sgtl5000_1.enable(); // Start SGTL5000
   sgtl5000_1.inputSelect(AUDIO_INPUT_LINEIN); // Select line in input
@@ -103,11 +110,10 @@ void setup()
 
 void loop() 
 {
-   
   /*  FREQUENCY SECTION   */
   cutoff_freq_val = analog_map(cutoff_pot, 0, 20000);
   filter1.frequency(cutoff_freq_val);
-  filter_button_state = digitalRead(filter_button);
+  filter_button_state = digitalRead(0);
   // See if user wants to switch filter
   if(filter_button_state == LOW)
   {
@@ -141,10 +147,26 @@ void loop()
   reverb_mix.gain(0, main_signal_val); // Original
   reverb_mix.gain(1, reverb_mix_val); // Reverb
 
+  /*  VOLUME AND BYPASS SECTION  */
   master_volume_val = analog_map(master_volume_pot, 0, 20000);
   amp1.gain(master_volume_val);
   Serial.print("Master Volume: ");
   Serial.println(master_volume_val);
+
+  // Check if bypass mode is on
+  bypass_switch_state = digitalRead(1);
+  while(bypass_switch_state == LOW)
+  {
+    bypass_mix.gain(0, 1); // Clean signal
+    bypass_mix.gain(1, 0); // Effects signal
+    master_volume_val = analog_map(master_volume_pot, 0, 20000);
+    amp1.gain(master_volume_val);
+    Serial.print("Master Volume: ");
+    Serial.println(master_volume_val);
+    Serial.print("Audio Processor Usage Max: ");
+    Serial.println(AudioProcessorUsageMax());
+    bypass_switch_state = digitalRead(1);
+  }
   
   /* PROCESSOR USAGE  */
   Serial.print("Audio Processor Usage Max: ");
@@ -153,7 +175,7 @@ void loop()
 }
 
 // Map analog value from pot to digital value
-// Returns mapped digital value
+// Returns mapped digital float value
 float analog_map(int pot, float range_low, float range_high)
 {
   float value = analogRead(pot);
