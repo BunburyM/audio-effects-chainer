@@ -4,7 +4,7 @@ A 4-person team project created during the 13th HackUMass event. This repository
 
 Our multi-effects pedal takes in an audio input and modifies it with four different effects in the following order: filter, bitcrush, delay, and reverb. The output can then be heard through speakers or headphones. 
 
-For the filtering stage, there are 3 different filters to choose from. These include the low-pass, high-pass, and band-pass filters. One can choose the cutoff frequency with a knob.
+For the filtering stage, we use the ladder filter, a famous low-pass filter implementation in synthesis. One can choose the cutoff frequency and the resonance with their respective knobs.
 
 Bitcrushing, the next stage, is a type of distortion. One can reduce the bit depth and sample rate of the incoming signal through knobs.
 
@@ -15,4 +15,4 @@ The final stage, reverb, offers room size and damping parameters to tweak with t
 If needed, there is functionality for the entire signal path to be bypassed with a switch.
 
 This is the flowchart of the signal path, created through the Audio System Design Tool of the Teensy Audio Library:
-![alt text](https://github.com/BunburyM/audio-effects-chainer/blob/main/system_flowchart.png?raw=true)
+![alt text](https://github.com/BunburyM/audio-effects-chainer/blob/main/system_image.png?raw=true)
