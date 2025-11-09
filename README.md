@@ -1,3 +1,18 @@
 # audio-effects-chainer
-Program that makes the Teensy 4.1 act as an audio effects chain!
+
+A 4-person team project created during the 13th HackUMass event. This repository holds our source code for our multi-effects pedal, with the Teensy 4.1 as our chosen microcontroller.
+
+Our multi-effects pedal takes in an audio input and modifies it with four different effects in the following order: filter, bitcrush, delay, and reverb. The output can then be heard through speakers or headphones. 
+
+For the filtering stage, there are 3 different filters to choose from. These include the low-pass, high-pass, and band-pass filters. One can choose the cutoff frequency with a knob.
+
+Bitcrushing, the next stage, is a type of distortion. One can reduce the bit depth and sample rate of the incoming signal through knobs.
+
+The 3rd stage, delay, offers a timing parameter in milliseconds to tweak the effect with a knob.
+
+The final stage, reverb, offers room size and damping parameters to tweak with their respective knobs.
+
+If needed, there is functionality for the entire signal path to be bypassed with a switch.
+
+This is the flowchart of the signal path, created through the Audio System Design Tool of the Teensy Audio Library:
 ![alt text](https://github.com/BunburyM/audio-effects-chainer/blob/main/system_flowchart.png?raw=true)
