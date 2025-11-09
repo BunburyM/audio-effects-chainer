@@ -6,6 +6,9 @@
 #include <Bounce.h>
 
 
+
+
+
 // GUItool: begin automatically generated code
 AudioInputI2S            i2s_in;         //xy=109,468
 AudioMixer4              pan_mix;        //xy=257,357
@@ -27,10 +30,10 @@ AudioConnection          patchCord5(filter1, 0, bitcrush_mix, 0);
 AudioConnection          patchCord6(filter1, bitcrush1);
 AudioConnection          patchCord7(bitcrush1, 0, bitcrush_mix, 1);
 AudioConnection          patchCord8(bitcrush_mix, 0, delay_mix, 0);
-AudioConnection          patchCord9(delay1, 0, reverb_mix, 0);
-AudioConnection          patchCord10(delay1, 0, delay_mix, 1);
-AudioConnection          patchCord11(delay1, 0, reverb1, 0);
-AudioConnection          patchCord12(delay_mix, delay1);
+AudioConnection          patchCord9(delay1, 0, delay_mix, 1);
+AudioConnection          patchCord10(delay_mix, delay1);
+AudioConnection          patchCord11(delay_mix, 0, reverb_mix, 0);
+AudioConnection          patchCord12(delay_mix, reverb1);
 AudioConnection          patchCord13(reverb1, 0, reverb_mix, 1);
 AudioConnection          patchCord14(reverb_mix, 0, bypass_mix, 1);
 AudioConnection          patchCord15(bypass_mix, amp1);
@@ -38,6 +41,8 @@ AudioConnection          patchCord16(amp1, 0, i2s_out, 0);
 AudioConnection          patchCord17(amp1, 0, i2s_out, 1);
 AudioControlSGTL5000     sgtl5000_1;     //xy=213,782
 // GUItool: end automatically generated code
+
+
 
 
 
