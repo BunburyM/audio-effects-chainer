@@ -10,8 +10,8 @@ AudioInputI2S            i2s_in;           //xy=94.33332824707031,204.3333435058
 AudioMixer4              pan_mix;         //xy=229.3332977294922,233.3333740234375
 AudioFilterStateVariable filter1;        //xy=252,366.33331298828125
 AudioMixer4              filter_mix;         //xy=384,371.33331298828125
-AudioEffectWaveshaper    waveshape1;     //xy=455.33331298828125,487.3333435058594
-AudioMixer4              waveshape_mix;         //xy=617.3333129882812,364.3333435058594
+AudioEffectBitcrusher    bitcrush1;    //xy=489,499.3333435058594
+AudioMixer4              bitcrush_mix;         //xy=617.3333129882812,364.3333435058594
 AudioEffectDelay         delay1;         //xy=737,486.33331298828125
 AudioMixer4              delay_mix;         //xy=858.3333129882812,353.33331298828125
 AudioEffectFreeverb      reverb1;      //xy=944.333251953125,469.3333435058594
@@ -26,11 +26,11 @@ AudioConnection          patchCord4(pan_mix, 0, bypass_mix, 0);
 AudioConnection          patchCord5(filter1, 0, filter_mix, 0);
 AudioConnection          patchCord6(filter1, 1, filter_mix, 1);
 AudioConnection          patchCord7(filter1, 2, filter_mix, 2);
-AudioConnection          patchCord8(filter_mix, waveshape1);
-AudioConnection          patchCord9(filter_mix, 0, waveshape_mix, 0);
-AudioConnection          patchCord10(waveshape1, 0, waveshape_mix, 1);
-AudioConnection          patchCord11(waveshape_mix, delay1);
-AudioConnection          patchCord12(waveshape_mix, 0, delay_mix, 0);
+AudioConnection          patchCord8(filter_mix, 0, bitcrush_mix, 0);
+AudioConnection          patchCord9(filter_mix, bitcrush1);
+AudioConnection          patchCord10(bitcrush1, 0, bitcrush_mix, 1);
+AudioConnection          patchCord11(bitcrush_mix, delay1);
+AudioConnection          patchCord12(bitcrush_mix, 0, delay_mix, 0);
 AudioConnection          patchCord13(delay1, 0, delay_mix, 1);
 AudioConnection          patchCord14(delay_mix, reverb1);
 AudioConnection          patchCord15(delay_mix, 0, reverb_mix, 0);
@@ -39,7 +39,7 @@ AudioConnection          patchCord17(reverb_mix, 0, bypass_mix, 1);
 AudioConnection          patchCord18(bypass_mix, amp1);
 AudioConnection          patchCord19(amp1, 0, i2s_out, 0);
 AudioConnection          patchCord20(amp1, 0, i2s_out, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=244.3333282470703,597.3333282470703
+AudioControlSGTL5000     sgtl5000_1;     //xy=254.3333282470703,515.3333435058594
 // GUItool: end automatically generated code
 
 // Define Analog Pins
@@ -48,12 +48,14 @@ AudioControlSGTL5000     sgtl5000_1;     //xy=244.3333282470703,597.333328247070
 #define master_volume_pot A1
 #define cutoff_pot A2
 #define filter_mix_pot A3
-#define waveshape_mix_pot A8
-#define delay_ms_pot A10-1
-#define delay_mix_pot A11-1
-#define reverb_roomsize_pot A12-2
-#define reverb_damping_pot A13-2
-#define reverb_mix_pot A14-2
+#define bitcrush_mix_pot A8
+#define bitcrush_bits_pot A10-1
+#define bitcrush_samplerate_pot A11-1
+#define delay_ms_pot A12-2
+#define delay_mix_pot A13-2
+#define reverb_roomsize_pot A14-2
+#define reverb_damping_pot A15-2 
+#define reverb_mix_pot A16
 
 // Debounce buttons
 Bounce filter_button = Bounce(0, 10);
@@ -61,7 +63,9 @@ Bounce bypass_button = Bounce(1, 10);
 
 // Variables
 float cutoff_freq_val = 20000; // 0 to 20000 Hz
-float waveshape_mix_val = 0; // 0 to 1
+float bitcrush_mix_val = 0; // 0 to 1
+uint8_t bitcrush_bits_val = 16; // 1 to 16 bits
+float bitcrush_samplerate_val = 44100; // 1 to 44100 Hz
 float delay_ms_val = 100; // 0 to 1000 ms
 float delay_mix_val = 0; // 0 to 1
 float reverb_roomsize_val = 0; // 0 to 1
@@ -93,6 +97,12 @@ void setup()
   filter_mix.gain(1, 0); // Band Pass Output
   filter_mix.gain(2, 0); // High Pass Output
 
+  bitcrush1.bits(bitcrush_bits_val);
+  bitcrush1.sampleRate(bitcrush_samplerate_val);
+
+  bitcrush_mix.gain(0, 1); // Original signal
+  bitcrush_mix.gain(1, 0); // Bitcrush Mix
+
   delay1.delay(0, delay_ms_val);
 
   delay_mix.gain(0, 1); // Original signal
@@ -120,11 +130,17 @@ void loop()
     switch_filter();
   }
   
-  /*  WAVESHAPE SECTION   */
-  waveshape_mix_val = analog_map(waveshape_mix_pot, 0, 1);
-  main_signal_val = 1 - waveshape_mix_val;
-  waveshape_mix.gain(0, main_signal_val); // Original
-  waveshape_mix.gain(1, waveshape_mix_val); // Waveshape
+  /*  BITCRUSHER SECTION   */
+  bitcrush_bits_val = (uint8_t)analog_map(bitcrush_bits_pot, 1, 16);
+  bitcrush1.bits(bitcrush_bits_val);
+
+  bitcrush_samplerate_val = analog_map(bitcrush_samplerate_pot, 1, 44100);
+  bitcrush1.sampleRate(bitcrush_samplerate_val);
+
+  bitcrush_mix_val = analog_map(bitcrush_mix_pot, 0, 1);
+  main_signal_val = 1 - bitcrush_mix_val;
+  bitcrush_mix.gain(0, main_signal_val); // Original
+  bitcrush_mix.gain(1, bitcrush_mix_val); // Bitcrush
 
   /*  DELAY SECTION   */
   delay_ms_val = analog_map(delay_ms_pot, 0, 1000);
