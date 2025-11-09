@@ -164,7 +164,7 @@ void loop()
   reverb_mix.gain(1, reverb_mix_val); // Reverb
 
   /*  VOLUME AND BYPASS SECTION  */
-  master_volume_val = analog_map(master_volume_pot, 0, 20000);
+  master_volume_val = analog_map(master_volume_pot, 0, 1);
   amp1.gain(master_volume_val);
   Serial.print("Master Volume: ");
   Serial.println(master_volume_val);
@@ -175,7 +175,7 @@ void loop()
   {
     bypass_mix.gain(0, 1); // Clean signal
     bypass_mix.gain(1, 0); // Effects signal
-    master_volume_val = analog_map(master_volume_pot, 0, 20000);
+    master_volume_val = analog_map(master_volume_pot, 0, 1);
     amp1.gain(master_volume_val);
     Serial.print("Master Volume: ");
     Serial.println(master_volume_val);
