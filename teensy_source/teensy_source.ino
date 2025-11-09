@@ -5,19 +5,20 @@
 #include <SerialFlash.h>
 #include <Bounce.h>
 
+
 // GUItool: begin automatically generated code
-AudioInputI2S            i2s_in;         //xy=82.33332824707031,515.3333129882812
-AudioMixer4              pan_mix;        //xy=230.3333282470703,404.33331298828125
-AudioFilterLadder        filter1;        //xy=265.33331298828125,650.3333129882812
-AudioEffectBitcrusher    bitcrush1;      //xy=408.33331298828125,756.3333129882812
-AudioMixer4              bitcrush_mix;   //xy=457.33331298828125,527.3333129882812
-AudioEffectDelay         delay1;         //xy=680.3333129882812,732.3333129882812
-AudioMixer4              delay_mix;      //xy=691.3333129882812,518.3333129882812
-AudioEffectFreeverb      reverb1;        //xy=932.3333282470703,780.3333129882812
-AudioMixer4              reverb_mix;     //xy=1054.3333282470703,673.3333129882812
-AudioMixer4              bypass_mix;     //xy=1212.3333740234375,404.33331298828125
-AudioAmplifier           amp1;           //xy=1320.3333282470703,684.3333129882812
-AudioOutputI2S           i2s_out;        //xy=1492.3333282470703,677.3333129882812
+AudioInputI2S            i2s_in;         //xy=109,468
+AudioMixer4              pan_mix;        //xy=257,357
+AudioFilterLadder        filter1;        //xy=292,603
+AudioEffectBitcrusher    bitcrush1;      //xy=435,709
+AudioMixer4              bitcrush_mix;   //xy=484,480
+AudioEffectDelay         delay1;         //xy=707,685
+AudioMixer4              delay_mix;      //xy=718,471
+AudioEffectFreeverb      reverb1;        //xy=959,733
+AudioMixer4              reverb_mix;     //xy=1081,626
+AudioMixer4              bypass_mix;     //xy=1239,357
+AudioAmplifier           amp1;           //xy=1347,637
+AudioOutputI2S           i2s_out;        //xy=1519,630
 AudioConnection          patchCord1(i2s_in, 0, pan_mix, 0);
 AudioConnection          patchCord2(i2s_in, 1, pan_mix, 1);
 AudioConnection          patchCord3(pan_mix, 0, bypass_mix, 0);
@@ -27,16 +28,23 @@ AudioConnection          patchCord6(filter1, bitcrush1);
 AudioConnection          patchCord7(bitcrush1, 0, bitcrush_mix, 1);
 AudioConnection          patchCord8(bitcrush_mix, 0, delay_mix, 0);
 AudioConnection          patchCord9(delay1, 0, reverb_mix, 0);
-AudioConnection          patchCord10(delay1, 0, reverb1, 0);
-AudioConnection          patchCord11(delay1, 0, delay_mix, 1);
+AudioConnection          patchCord10(delay1, 0, delay_mix, 1);
+AudioConnection          patchCord11(delay1, 0, reverb1, 0);
 AudioConnection          patchCord12(delay_mix, delay1);
 AudioConnection          patchCord13(reverb1, 0, reverb_mix, 1);
 AudioConnection          patchCord14(reverb_mix, 0, bypass_mix, 1);
 AudioConnection          patchCord15(bypass_mix, amp1);
 AudioConnection          patchCord16(amp1, 0, i2s_out, 0);
 AudioConnection          patchCord17(amp1, 0, i2s_out, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=186.3333282470703,829.3333129882812
+AudioControlSGTL5000     sgtl5000_1;     //xy=213,782
 // GUItool: end automatically generated code
+
+
+
+
+
+
+
 
 // Define Analog Pins
 // Free A0, A2, A3, A8, A10-1, A11-1, A12-2, A13-2, A14-2, A15-2, A16, A17
@@ -83,7 +91,7 @@ void setup()
 
   filter1.frequency(cutoff_freq_val);
   filter1.resonance(cutoff_resonance_val);
-  filter1.inputDrive(0.1);
+  filter1.inputDrive(1);
   filter1.octaveControl(0);
   filter1.passbandGain(0.5);
 
@@ -118,7 +126,7 @@ void setup()
 void loop() 
 {
   /*  FREQUENCY SECTION   */
-  cutoff_freq_val = analog_map(cutoff_pot, 0, 20000);
+  cutoff_freq_val = int(analog_map(cutoff_pot, 0, 20000)/100+0.5)*100;
   filter1.frequency(cutoff_freq_val);
   Serial.println("cutoff frequency " + String(cutoff_freq_val));
   cutoff_resonance_val = analog_map(cutoff_resonance_pot, 0, 1.8);
