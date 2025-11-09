@@ -16,3 +16,6 @@ If needed, there is functionality for the entire signal path to be bypassed with
 
 This is the flowchart of the signal path, created through the Audio System Design Tool of the Teensy Audio Library:
 ![alt text](https://github.com/BunburyM/audio-effects-chainer/blob/main/system_image.png?raw=true)
+
+
+![alt_test](https://github.com/BunburyM/audio-effects-chainer/blob/main/AM_Radio_Synth_Enclosure_2025-Nov-09_03-49-56AM-000_CustomizedView382233412_png_alpha.png?raw=true)
