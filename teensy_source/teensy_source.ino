@@ -47,7 +47,6 @@ AudioControlSGTL5000     sgtl5000_1;     //xy=254.3333282470703,515.333343505859
 // Free Digital pins 0, 1, 2, 3, 4, 5
 #define master_volume_pot A1
 #define cutoff_pot A2
-#define filter_mix_pot A3
 #define bitcrush_mix_pot A8
 #define bitcrush_bits_pot A10-1
 #define bitcrush_samplerate_pot A11-1
@@ -76,6 +75,7 @@ float master_volume_val = 0; // 0 to 1
 int filter_button_state = 0; // 0 to 1
 int filter_choose_val = 0; // 0 to 2
 int bypass_switch_state = 0; // 0 to 1
+int filter_changed = 1; // 0 to 1
 
 void setup() 
 {
@@ -114,7 +114,7 @@ void setup()
   reverb_mix.gain(0, 1); // Original signal
   reverb_mix.gain(1, 0); // Reverb Mix
 
-  sgtl5000_1.volume(0.5); // Set headphone volume level
+  sgtl5000_1.volume(1); // Set headphone volume level
   amp1.gain(1);
 }
 
@@ -125,9 +125,15 @@ void loop()
   filter1.frequency(cutoff_freq_val);
   filter_button_state = digitalRead(0);
   // See if user wants to switch filter
-  if(filter_button_state == LOW)
+  if(filter_button_state == LOW && filter_changed == 1)
   {
     switch_filter();
+    filter_changed = 0;
+  }
+
+  else if(filter_button_state == HIGH)
+  {
+    filter_changed = 1;
   }
   
   /*  BITCRUSHER SECTION   */
@@ -166,8 +172,6 @@ void loop()
   /*  VOLUME AND BYPASS SECTION  */
   master_volume_val = analog_map(master_volume_pot, 0, 1);
   amp1.gain(master_volume_val);
-  Serial.print("Master Volume: ");
-  Serial.println(master_volume_val);
 
   // Check if bypass mode is on
   bypass_switch_state = digitalRead(1);
@@ -177,17 +181,11 @@ void loop()
     bypass_mix.gain(1, 0); // Effects signal
     master_volume_val = analog_map(master_volume_pot, 0, 1);
     amp1.gain(master_volume_val);
-    Serial.print("Master Volume: ");
-    Serial.println(master_volume_val);
-    Serial.print("Audio Processor Usage Max: ");
-    Serial.println(AudioProcessorUsageMax());
     bypass_switch_state = digitalRead(1);
   }
-  
-  /* PROCESSOR USAGE  */
-  Serial.print("Audio Processor Usage Max: ");
-  Serial.println(AudioProcessorUsageMax());
- 
+
+  bypass_mix.gain(0, 0); // Clean signal
+  bypass_mix.gain(1, 1); // Effects signal
 }
 
 // Map analog value from pot to digital value
