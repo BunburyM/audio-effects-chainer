@@ -83,7 +83,7 @@ int bypass_switch_state = 0; // 0 to 1
 
 void setup() 
 {
-  Serial.begin(9600);
+  //Serial.begin(9600);
   pinMode(1, INPUT_PULLUP); // Bypass Mode
 
   AudioMemory(1500);
@@ -133,7 +133,7 @@ void loop()
   /*  FREQUENCY SECTION   */
   cutoff_freq_val = int(analog_map(cutoff_pot, 0, 20000)/100+0.5)*100;
   filter1.frequency(cutoff_freq_val);
-  Serial.println("cutoff frequency " + String(cutoff_freq_val));
+  //Serial.println("cutoff frequency " + String(cutoff_freq_val));
   cutoff_resonance_val = analog_map(cutoff_resonance_pot, 0, 1.8);
   filter1.resonance(cutoff_resonance_val);
   
@@ -148,7 +148,7 @@ void loop()
   main_signal_val = 1 - bitcrush_mix_val;
   bitcrush_mix.gain(0, main_signal_val); // Original
   bitcrush_mix.gain(1, bitcrush_mix_val); // Bitcrush
-  Serial.println("bitcrush value " + String(bitcrush_mix_val));
+  //Serial.println("bitcrush value " + String(bitcrush_mix_val));
 
   /*  DELAY SECTION   */
   delay_ms_val = analog_map(delay_ms_pot, 0, 1000);
@@ -158,7 +158,7 @@ void loop()
   main_signal_val = 1 - delay_mix_val;
   delay_mix.gain(0, main_signal_val); // Original
   delay_mix.gain(1, delay_mix_val); // Delay
-  Serial.println("delay value " + String( delay_mix_val));
+  //Serial.println("delay value " + String( delay_mix_val));
 
   /*  REVERB SECTION   */
   reverb_roomsize_val = analog_map(reverb_roomsize_pot, 0, 1);
@@ -171,12 +171,12 @@ void loop()
   main_signal_val = 1 - reverb_mix_val;
   reverb_mix.gain(0, main_signal_val); // Original
   reverb_mix.gain(1, reverb_mix_val); // Reverb
-  Serial.println("reverb value " + String(reverb_mix_val));
+  //Serial.println("reverb value " + String(reverb_mix_val));
 
   /*  VOLUME AND BYPASS SECTION  */
   master_volume_val = analog_map(master_volume_pot, 0, 1);
   amp1.gain(master_volume_val);
-  Serial.println("master volume " + String(master_volume_val));
+  //Serial.println("master volume " + String(master_volume_val));
 
   // Check if bypass mode is on
   bypass_switch_state = digitalRead(1);
